@@ -423,7 +423,7 @@ function copyPixCode() {
     const pixCode = document.getElementById('pix-code');
     pixCode.select();
     document.execCommand('copy');
-    alert('Código PIX copiado para a área de transferência!');
+    alert('Código PIX copiado! Cole no seu aplicativo do banco.');
 }
 
 async function verifyAndDownload() {
