@@ -111,9 +111,22 @@ function initSync() {
 }
 
 function initZoom() {
-    let scale = 0.8;
     const canvas = document.getElementById('cv-preview');
     const levelDisplay = document.getElementById('zoom-level');
+    let scale = 0.8;
+
+    // Ajuste automático inicial para Mobile
+    const autoScale = () => {
+        if (window.innerWidth < 480) {
+            // Calcula escala baseada na largura da tela (com margem de 20px)
+            // 800px é a largura base aproximada do currículo A4 no navegador
+            scale = (window.innerWidth - 20) / 800;
+            if (scale > 0.5) scale = 0.5;
+        } else {
+            scale = 0.8;
+        }
+        updateScale();
+    };
 
     document.getElementById('zoom-in').addEventListener('click', () => {
         if (scale < 1.2) scale += 0.1;
@@ -121,7 +134,7 @@ function initZoom() {
     });
 
     document.getElementById('zoom-out').addEventListener('click', () => {
-        if (scale > 0.4) scale -= 0.1;
+        if (scale > 0.2) scale -= 0.1;
         updateScale();
     });
 
@@ -129,6 +142,10 @@ function initZoom() {
         canvas.style.transform = `scale(${scale})`;
         levelDisplay.innerText = `${Math.round(scale * 100)}%`;
     }
+
+    // Rodar no início e quando girar a tela
+    autoScale();
+    window.addEventListener('resize', autoScale);
 }
 
 function addExperience() {

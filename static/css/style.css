@@ -1095,8 +1095,17 @@ textarea {
 }
 
 @media (max-width: 480px) {
-    .modal-content {
-        padding: 30px 20px;
+    .preview-canvas {
+        padding: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        overflow-x: hidden;
+    }
+
+    .cv-paper {
+        transform-origin: top center;
+        margin: 0 auto !important;
     }
 }
 
