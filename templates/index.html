@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Currículo - Profissional</title>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;600;800&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Editor Sidebar -->
+        <aside class="editor-sidebar">
+            <header class="sidebar-header">
+                <h1>Currículo<span>+</span></h1>
+                <p>Crie seu currículo profissional em minutos</p>
+            </header>
+
+            <!-- Modelos -->
+            <div class="template-selector" style="padding: 15px 25px;">
+                <div class="section-header" style="margin-bottom: 10px;">
+                    <i class="fas fa-palette"></i>
+                    <h2>Modelo</h2>
+                </div>
+                <div class="template-options" style="display: flex; gap: 10px;">
+                    <label class="template-option" style="flex: 1; cursor: pointer;">
+                        <input type="radio" name="template" value="basic" checked style="display: none;">
+                        <span class="template-card"
+                            style="display: block; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; text-align: center; font-weight: 600;">
+                            Básico
+                        </span>
+                    </label>
+                    <label class="template-option" style="flex: 1; cursor: pointer;">
+                        <input type="radio" name="template" value="professional" style="display: none;">
+                        <span class="template-card"
+                            style="display: block; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; text-align: center; font-weight: 600;">
+                            Profissional
+                        </span>
+                    </label>
+                </div>
+            </div>
+            <input type="hidden" id="current-template" value="basic">
+
+            <form id="cv-form" class="editor-form">
+                <section class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-camera"></i>
+                        <h2>Foto de Perfil</h2>
+                    </div>
+                    <div class="input-group">
+                        <input type="file" id="in-photo" accept="image/*" class="file-input">
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-user-circle"></i>
+                        <h2>Informações Pessoais</h2>
+                    </div>
+                    <div class="input-group">
+                        <label>Nome Completo</label>
+                        <input type="text" id="in-name" placeholder="Ex: João Silva" data-sync="cv-name">
+                    </div>
+                    <div class="input-group">
+                        <label>Cargo Desejado</label>
+                        <input type="text" id="in-title" placeholder="Ex: Desenvolvedor Senior" data-sync="cv-title">
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>E-mail</label>
+                            <input type="email" id="in-email" placeholder="joao@email.com" data-sync="cv-email">
+                        </div>
+                        <div class="input-group">
+                            <label>Telefone</label>
+                            <input type="text" id="in-phone" placeholder="(11) 99999-9999" data-sync="cv-phone">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Localização</label>
+                        <input type="text" id="in-location" placeholder="Cidade, Estado" data-sync="cv-location">
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-edit"></i>
+                        <h2>Resumo Profissional</h2>
+                    </div>
+                    <div class="input-group">
+                        <textarea id="in-summary" placeholder="Fale um pouco sobre sua trajetória..."
+                            data-sync="cv-summary" maxlength="600"></textarea>
+                        <small style="color: #64748b; font-size: 0.75rem;">Máximo de 600 caracteres para manter em uma
+                            página.</small>
+                    </div>
+                </section>
+
+                <!-- Experiência -->
+                <section class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-briefcase"></i>
+                        <h2>Experiência</h2>
+                        <button type="button" class="add-btn" onclick="addExperience()">+</button>
+                    </div>
+                    <div id="exp-items"></div>
+                </section>
+
+                <!-- Educação -->
+                <section class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h2>Educação</h2>
+                        <button type="button" class="add-btn" onclick="addEducation()">+</button>
+                    </div>
+                    <div id="edu-items"></div>
+                </section>
+
+                <!-- Habilidades -->
+                <section class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-tools"></i>
+                        <h2>Habilidades</h2>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="skill-input" placeholder="Digite e pressione Enter">
+                        <div id="skills-tags" class="tags-container"></div>
+                    </div>
+                </section>
+            </form>
+        </aside>
+
+        <!-- Preview Area -->
+        <main class="preview-area">
+            <header class="preview-header">
+                <div class="zoom-controls">
+                    <button id="zoom-out"><i class="fas fa-minus"></i></button>
+                    <span id="zoom-level">80%</span>
+                    <button id="zoom-in"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="download-actions">
+                    <button class="btn-download pdf" onclick="downloadImage()">
+                        <i class="fas fa-image"></i> Download CV
+                    </button>
+                </div>
+            </header>
+
+            <div class="preview-canvas" oncontextmenu="return false;">
+                <div id="cv-preview" class="cv-paper basic">
+                    <div class="watermark">AMOSTRA - PAGAMENTO PENDENTE</div>
+                    <div class="protection-overlay"></div>
+                    <div class="cv-content">
+                        <!-- Sidebar (for Professional) -->
+                        <aside class="cv-sidebar">
+                            <div class="cv-section sidebar-contact">
+                                <h2 class="cv-section-title">Contato</h2>
+                                <div class="side-contact-item"><strong>Email</strong><br /><span
+                                        id="cv-email-side">email@exemplo.com</span></div>
+                                <div class="side-contact-item"><strong>Telefone</strong><br /><span
+                                        id="cv-phone-side">(00) 00000-0000</span></div>
+                                <div class="side-contact-item"><strong>Localização</strong><br /><span
+                                        id="cv-location-side">Cidade - UF</span></div>
+                            </div>
+                            <div class="cv-section" id="cv-skills-section-side">
+                                <h2 class="cv-section-title">Habilidades</h2>
+                                <div id="preview-skills-list-side" class="skills-container-side"></div>
+                            </div>
+                        </aside>
+
+                        <!-- Main Column -->
+                        <main class="cv-main">
+                            <div class="cv-header">
+                                <div class="cv-photo-container">
+                                    <img id="cv-photo" src="" alt="Foto">
+                                </div>
+                                <div class="cv-header-text">
+                                    <h1 id="cv-name">Seu Nome</h1>
+                                    <p id="cv-title">Cargo Desejado</p>
+                                    <div class="cv-contact-header">
+                                        <span id="cv-email">email@exemplo.com</span> |
+                                        <span id="cv-phone">(00) 00000-0000</span> |
+                                        <span id="cv-location">Cidade - UF</span>
+                                    </div>
+                                    <div class="header-divider"></div>
+                                </div>
+                            </div>
+
+                            <div class="cv-section" id="cv-summary-section">
+                                <h2 class="cv-section-title">Resumo</h2>
+                                <p id="cv-summary">Seu resumo profissional aparecerá aqui.</p>
+                            </div>
+
+                            <div class="cv-section" id="cv-exp-section">
+                                <h2 class="cv-section-title">Experiência</h2>
+                                <div id="preview-exp-list"></div>
+                            </div>
+
+                            <div class="cv-section" id="cv-edu-section">
+                                <h2 class="cv-section-title">Educação</h2>
+                                <div id="preview-edu-list"></div>
+                            </div>
+
+                            <div class="cv-section" id="cv-skills-section-main">
+                                <h2 class="cv-section-title">Habilidades</h2>
+                                <div id="preview-skills-list-main" class="skills-container-main"></div>
+                            </div>
+                        </main>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <button class="tab-btn active" onclick="switchMobileTab('edit')">
+            <i class="fas fa-pen"></i><span>Editar</span>
+        </button>
+        <button class="tab-btn" onclick="switchMobileTab('view')">
+            <i class="fas fa-eye"></i><span>Ver</span>
+        </button>
+    </nav>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closePaymentModal()">&times;</button>
+            <div class="modal-header">
+                <i class="fas fa-qrcode"></i>
+                <h2>Liberação de Download</h2>
+                <p>Pague apenas <strong>R$ 2,00</strong> via PIX para baixar seu currículo profissional.</p>
+            </div>
+            <div class="pix-container">
+                <div id="pix-qrcode" class="qrcode-placeholder">
+                    <!-- QR Code will be here -->
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=00020126360014br.gov.bcb.pix0114SUACHAVEPIX0202.005204000053039865802BR5913NOME6009CIDADE62070503***6304" alt="QR Code PIX">
+                </div>
+                <div class="pix-copy-paste">
+                    <label>Código PIX (Copia e Cola):</label>
+                    <div class="copy-group">
+                        <input type="text" id="pix-code" value="00020126360014br.gov.bcb.pix0114SUACHAVEPIX0202.005204000053039865802BR5913NOME6009CIDADE62070503***6304" readonly>
+                        <button onclick="copyPixCode()"><i class="fas fa-copy"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-confirm" onclick="verifyAndDownload()">
+                    <i class="fas fa-check-circle"></i> Já realizei o pagamento
+                </button>
+                <p class="safe-text"><i class="fas fa-shield-alt"></i> Pagamento 100% Seguro</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>
