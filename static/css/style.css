@@ -918,7 +918,8 @@ textarea {
     }
 
     .cv-paper {
-        transform: scale(0.4) !important;
+        /* Removido o !important para permitir zoom via JS */
+        transform-origin: top center;
     }
 }
 
@@ -1110,13 +1111,9 @@ textarea {
     }
 
     .cv-paper {
-        display: inline-block !important;
-        zoom: 0.45; /* Redimensiona o conteúdo proporcionalmente */
-        -moz-transform: scale(0.45);
-        -moz-transform-origin: top center;
-        margin: 0 auto !important;
-        position: relative !important;
-        left: 0 !important;
+        display: block;
+        margin: 0 auto;
+        position: relative;
     }
 }
 

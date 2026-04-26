@@ -105,11 +105,14 @@ function initZoom() {
 
     const autoScale = () => {
         if (window.innerWidth < 480) {
-            scale = (window.innerWidth - 20) / 800;
-            if (scale > 0.5) scale = 0.5;
+            scale = (window.innerWidth - 30) / 800;
+        } else if (window.innerWidth < 1024) {
+            scale = (window.innerWidth - 100) / 800;
         } else {
             scale = 0.8;
         }
+        if (scale > 1) scale = 1;
+        if (scale < 0.2) scale = 0.2;
         updateScale();
     };
 
@@ -128,7 +131,7 @@ function initZoom() {
     }
 
     function updateScale() {
-        canvas.style.transform = `scale(${scale})`;
+        canvas.style.setProperty('transform', `scale(${scale})`, 'important');
         if (levelDisplay) levelDisplay.innerText = `${Math.round(scale * 100)}%`;
     }
 
@@ -312,22 +315,38 @@ async function verifyAndDownload() {
 async function executeDownload() {
     const paper = document.getElementById('cv-preview');
     paper.classList.add('downloading');
-    const ot = paper.style.transform;
-    const oz = paper.style.zoom;
     
-    paper.style.transform = 'none';
-    paper.style.zoom = '1';
+    // Salva o estado atual
+    const originalTransform = paper.style.transform;
+    const originalWidth = paper.style.width;
+    
+    // Reseta para tamanho real para a captura
+    paper.style.setProperty('transform', 'none', 'important');
+    paper.style.width = '210mm'; // Garante largura A4
     
     try {
-        await new Promise(r => setTimeout(r, 800));
-        const canvas = await html2canvas(paper, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+        // Pequena pausa para o navegador processar o reset de estilo
+        await new Promise(r => setTimeout(r, 500));
+        
+        const canvas = await html2canvas(paper, { 
+            scale: 2, 
+            useCORS: true, 
+            backgroundColor: '#ffffff',
+            windowWidth: 800, // Força largura de captura
+            scrollY: -window.scrollY // Corrige problemas de scroll no mobile
+        });
+        
         const link = document.createElement('a');
         link.download = `curriculo.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
-    } catch (e) { alert('Erro no download'); } finally {
-        paper.style.transform = ot;
-        paper.style.zoom = oz;
+    } catch (e) { 
+        console.error(e);
+        alert('Erro no download'); 
+    } finally {
+        // Restaura o estado visual
+        paper.style.setProperty('transform', originalTransform, 'important');
+        paper.style.width = originalWidth;
         paper.classList.remove('downloading');
     }
 }
