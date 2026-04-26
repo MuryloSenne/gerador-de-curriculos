@@ -896,12 +896,14 @@ textarea {
         height: auto;
         border-right: none;
         overflow: visible;
+        padding-bottom: 60px; /* Evita que a barra cubra o conteúdo */
     }
 
     .preview-area {
         height: 100vh;
         position: sticky;
         top: 0;
+        padding-bottom: 60px; /* Evita que a barra cubra o conteúdo */
     }
 
     .preview-area:not(.active-tab) { /* Fallback ou classe inicial */
@@ -923,6 +925,33 @@ textarea {
         bottom: 0;
         left: 0;
         right: 0;
+        height: 55px; /* Altura reduzida */
+        background: white;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        z-index: 1000;
+    }
+
+    .tab-btn {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: #64748b;
+        font-size: 0.7rem; /* Texto menor */
+        font-weight: 600;
+        gap: 2px;
+        transition: 0.2s;
+    }
+
+    .tab-btn i {
+        font-size: 1rem; /* Ícone menor */
+    }
+
+    .tab-btn.active {
+        color: #4f46e5;
     }
 
     .editor-sidebar.hidden {
