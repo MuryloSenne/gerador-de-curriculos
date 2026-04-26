@@ -218,8 +218,10 @@ function addExperience() {
     container.insertAdjacentHTML('beforeend', html);
     document.getElementById('preview-exp-list').insertAdjacentHTML('beforeend', `
         <div class="preview-item" id="preview-exp-${id}">
-            <strong><span id="preview-exp-role-${id}">Cargo</span></strong>
-            <span class="period" id="preview-exp-period-${id}">Período</span>
+            <div class="preview-item-header">
+                <strong><span id="preview-exp-role-${id}">Cargo</span></strong>
+                <span class="period" id="preview-exp-period-${id}">Período</span>
+            </div>
             <em><span id="preview-exp-comp-${id}">Empresa</span></em>
             <p id="preview-exp-desc-${id}"></p>
         </div>
@@ -251,8 +253,10 @@ function addEducation() {
     container.insertAdjacentHTML('beforeend', html);
     document.getElementById('preview-edu-list').insertAdjacentHTML('beforeend', `
         <div class="preview-item" id="preview-edu-${id}">
-            <strong><span id="preview-edu-degree-${id}">Curso</span></strong>
-            <span class="period" id="preview-edu-year-${id}">Ano</span>
+            <div class="preview-item-header">
+                <strong><span id="preview-edu-degree-${id}">Curso</span></strong>
+                <span class="period" id="preview-edu-year-${id}">Ano</span>
+            </div>
             <em><span id="preview-edu-school-${id}">Instituição</span></em>
         </div>
     `);
@@ -279,7 +283,7 @@ async function openPaymentModal() {
             document.querySelector('#pix-qrcode img').src = `data:image/png;base64,${payment.point_of_interaction.transaction_data.qr_code_base64}`;
             document.getElementById('pix-code').value = payment.point_of_interaction.transaction_data.qr_code;
         }
-    } catch (e) {}
+    } catch (e) { }
     document.getElementById('payment-modal').classList.add('active');
     btn.innerHTML = originalBtn;
 }
@@ -315,34 +319,34 @@ async function verifyAndDownload() {
 async function executeDownload() {
     const paper = document.getElementById('cv-preview');
     paper.classList.add('downloading');
-    
+
     // Salva o estado atual
     const originalTransform = paper.style.transform;
     const originalWidth = paper.style.width;
-    
+
     // Reseta para tamanho real para a captura
     paper.style.setProperty('transform', 'none', 'important');
     paper.style.width = '210mm'; // Garante largura A4
-    
+
     try {
         // Pequena pausa para o navegador processar o reset de estilo
         await new Promise(r => setTimeout(r, 500));
-        
-        const canvas = await html2canvas(paper, { 
-            scale: 2, 
-            useCORS: true, 
+
+        const canvas = await html2canvas(paper, {
+            scale: 2,
+            useCORS: true,
             backgroundColor: '#ffffff',
             windowWidth: 800, // Força largura de captura
             scrollY: -window.scrollY // Corrige problemas de scroll no mobile
         });
-        
+
         const link = document.createElement('a');
         link.download = `curriculo.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
-    } catch (e) { 
+    } catch (e) {
         console.error(e);
-        alert('Erro no download'); 
+        alert('Erro no download');
     } finally {
         // Restaura o estado visual
         paper.style.setProperty('transform', originalTransform, 'important');

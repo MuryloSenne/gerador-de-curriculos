@@ -420,6 +420,7 @@ textarea {
     background: white;
     width: var(--paper-width);
     height: var(--paper-height);
+    min-width: var(--paper-width); /* Garante que não encolha no celular */
     margin: 0 auto;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     transform-origin: top center;
@@ -429,6 +430,8 @@ textarea {
     word-wrap: break-word;
     font-family: 'Inter', sans-serif;
     color: #1e293b;
+    -webkit-text-size-adjust: none; /* Impede o celular de mudar o tamanho do texto */
+    text-size-adjust: none;
 }
 
 .cv-photo-container {
@@ -544,37 +547,41 @@ textarea {
 }
 
 .basic .preview-item {
-    margin-bottom: 18pt;
+    margin-bottom: 12pt;
+}
+
+.basic .preview-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 2pt;
 }
 
 .basic .preview-item strong {
-    display: inline-block;
-    font-size: 11.5pt;
+    font-size: 11pt;
     font-weight: 700;
     color: #1e293b;
 }
 
 .basic .preview-item span.period {
-    float: right;
-    font-size: 9.5pt;
+    font-size: 9pt;
     color: #64748b;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .basic .preview-item em {
     display: block;
     color: #4f46e5;
-    font-size: 10pt;
+    font-size: 9.5pt;
     font-weight: 600;
     font-style: normal;
-    margin-bottom: 5px;
-    margin-top: 2px;
+    margin-bottom: 3pt;
 }
 
 .basic .preview-item p {
     font-size: 9.5pt;
     color: #475569;
-    line-height: 1.6;
+    line-height: 1.5;
     text-align: justify;
 }
 
@@ -1103,10 +1110,10 @@ textarea {
 
 @media (max-width: 480px) {
     .preview-canvas {
-        padding: 10px 5px !important;
-        display: block !important;
-        text-align: center !important;
-        overflow-x: auto !important;
+        padding: 20px 10px !important;
+        display: flex !important; /* Mantém flex para centralizar igual ao PC */
+        justify-content: center !important;
+        overflow: auto !important;
         -webkit-overflow-scrolling: touch;
     }
 
