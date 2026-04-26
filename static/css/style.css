@@ -1178,3 +1178,71 @@ textarea {
 .downloading .cv-paper {
     user-select: auto !important;
 }
+
+/* Preloader / Splash Screen */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.6s ease, visibility 0.6s;
+}
+
+.loader-content {
+    text-align: center;
+}
+
+.loader-logo {
+    font-family: 'Outfit', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 20px;
+    letter-spacing: -1.5px;
+}
+
+.loader-logo span {
+    color: #4f46e5;
+}
+
+.loader-bar {
+    width: 200px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin: 0 auto 15px;
+    overflow: hidden;
+    position: relative;
+}
+
+.loader-progress {
+    width: 40%;
+    height: 100%;
+    background: #4f46e5;
+    border-radius: 10px;
+    position: absolute;
+    animation: loadingMove 1.5s infinite ease-in-out;
+}
+
+#preloader p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+@keyframes loadingMove {
+    0% { left: -40%; }
+    50% { left: 100%; }
+    100% { left: -40%; }
+}
+
+#preloader.fade-out {
+    opacity: 0;
+    visibility: hidden;
+}
