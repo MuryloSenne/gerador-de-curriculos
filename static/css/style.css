@@ -632,19 +632,19 @@ textarea {
 }
 
 .professional .side-contact-item {
-    margin-bottom: 12pt;
+    margin-bottom: 10pt;
     font-size: 9.5pt;
     color: #e2e8f0;
-    line-height: 1.4;
+    line-height: 1.1; /* Reduzido para aproximar as linhas */
 }
 
 .professional .side-contact-item strong {
     display: block;
-    font-size: 8pt;
+    font-size: 7.5pt;
     color: #94a3b8;
     text-transform: uppercase;
     font-weight: 700;
-    margin-bottom: 3pt;
+    margin-bottom: 1pt; /* Reduzido para aproximar do texto abaixo */
     letter-spacing: 0.5pt;
 }
 
