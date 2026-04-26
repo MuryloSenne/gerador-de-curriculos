@@ -354,3 +354,21 @@ async function executeDownload() {
         paper.classList.remove('downloading');
     }
 }
+
+function switchMobileTab(tab) {
+    const sidebar = document.querySelector('.editor-sidebar');
+    const preview = document.querySelector('.preview-area');
+    const tabs = document.querySelectorAll('.tab-btn');
+
+    if (tab === 'edit') {
+        sidebar.classList.remove('hidden');
+        preview.classList.add('hidden');
+        tabs[0].classList.add('active');
+        tabs[1].classList.remove('active');
+    } else {
+        sidebar.classList.add('hidden');
+        preview.classList.remove('hidden');
+        tabs[0].classList.remove('active');
+        tabs[1].classList.add('active');
+    }
+}

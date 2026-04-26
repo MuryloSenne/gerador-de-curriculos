@@ -904,6 +904,19 @@ textarea {
         top: 0;
     }
 
+    .preview-area:not(.active-tab) { /* Fallback ou classe inicial */
+        display: none;
+    }
+
+    /* Mais simples: se estiver no celular, esconde a prévia por padrão */
+    .preview-area {
+        display: none;
+    }
+    
+    .preview-area:not(.hidden) {
+        display: flex;
+    }
+
     .mobile-nav {
         display: flex;
         position: fixed;
