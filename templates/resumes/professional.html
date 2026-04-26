@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 0; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', Helvetica, Arial, sans-serif; margin: 0; padding: 0; color: #1e293b; font-size: 10pt; line-height: 150%; -webkit-font-smoothing: antialiased; }
+        
+        .name { font-family: 'Outfit', sans-serif; font-size: 28pt; font-weight: 800; color: #0f172a; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: -0.5pt; }
+        .title { font-size: 12.5pt; color: #3b82f6; text-transform: uppercase; font-weight: 700; letter-spacing: 1.5pt; margin-bottom: 0; }
+        .header-divider { border-bottom: 2pt solid #e2e8f0; margin-bottom: 25pt; margin-top: 20pt; }
+        
+        .side-title { font-size: 11pt; font-weight: 800; text-transform: uppercase; color: #ffffff; border-bottom: 2pt solid #3b82f6; padding-bottom: 6pt; margin-bottom: 15pt; margin-top: 25pt; letter-spacing: 1pt; display: inline-block; }
+        .side-item { font-size: 9.5pt; margin-bottom: 12pt; color: #e2e8f0; word-wrap: break-word; line-height: 140%; }
+        .side-label { font-size: 8pt; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 3pt; letter-spacing: 0.5pt; }
+        
+        .section-header { margin-top: 20pt; margin-bottom: 15pt; }
+        .section-title { font-size: 11.5pt; font-weight: 800; text-transform: uppercase; color: #0f172a; letter-spacing: 1pt; border-bottom: 2.5pt solid #3b82f6; padding-bottom: 4pt; display: inline-block; }
+        
+        .summary { font-size: 10pt; color: #334155; line-height: 160%; margin-bottom: 25pt; text-align: justify; }
+        
+        .item { margin-bottom: 18pt; }
+        .item-tit { font-weight: 700; font-size: 11.5pt; color: #1e293b; margin-bottom: 2pt; }
+        .item-sub { font-size: 9.5pt; color: #64748b; margin-bottom: 5pt; font-weight: 600; }
+        .item-company { color: #3b82f6; font-size: 10pt; font-weight: 600; margin-bottom: 5pt; }
+        .item-desc { font-size: 9.5pt; color: #475569; line-height: 160%; text-align: justify; }
+        
+        .skill-item { font-size: 9.5pt; margin-bottom: 6pt; color: #e2e8f0; font-weight: 500; display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4pt; }
+    </style>
+</head>
+<body>
+    <table width="100%" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; margin: 0; padding: 0;">
+        <tr>
+            <td width="32%" style="background-color: #0f172a; color: white; vertical-align: top; padding: 40pt 25pt;">
+                <div class="side-title" style="margin-top: 0;">Contato</div>
+                <div class="side-item"><div class="side-label">Email</div><div>{{ data.email }}</div></div>
+                <div class="side-item"><div class="side-label">Telefone</div><div>{{ data.phone }}</div></div>
+                <div class="side-item"><div class="side-label">Localização</div><div>{{ data.location }}</div></div>
+                
+                {% if data.skills %}
+                <div class="side-title" style="margin-top: 30pt;">Habilidades</div>
+                {% for skill in data.skills %}<div class="skill-item">{{ skill }}</div>{% endfor %}
+                {% endif %}
+            </td>
+            <td width="68%" style="background-color: #ffffff; vertical-align: top; padding: 40pt 40pt;">
+                <div class="name">{{ data.name or 'Seu Nome' }}</div>
+                <div class="title">{{ data.title or 'Cargo Desejado' }}</div>
+                <div class="header-divider"></div>
+
+                {% if data.summary %}
+                <div class="section-header" style="margin-top: 0;"><span class="section-title">Resumo</span></div>
+                <div class="summary">{{ data.summary | replace('\n', '<br/>') | safe }}</div>
+                {% endif %}
+
+                {% if data.experience %}
+                <div class="section-header"><span class="section-title">Experiência</span></div>
+                {% for exp in data.experience %}
+                <div class="item">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="width: 100%; margin-bottom: 3pt; table-layout: fixed;">
+                        <tr>
+                            <td align="left" class="item-tit" style="padding: 0; width: 65%;">{{ exp.role }}</td>
+                            <td align="right" class="item-sub" style="margin-bottom: 0; padding: 0; text-align: right; width: 35%;">{{ exp.period }}</td>
+                        </tr>
+                    </table>
+                    <div class="item-company">{{ exp.company }}</div>
+                    <div class="item-desc">{{ exp.description | replace('\n', '<br/>') | safe }}</div>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                {% if data.education %}
+                <div class="section-header"><span class="section-title">Educação</span></div>
+                {% for edu in data.education %}
+                <div class="item">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="width: 100%; margin-bottom: 3pt; table-layout: fixed;">
+                        <tr>
+                            <td align="left" class="item-tit" style="padding: 0; width: 65%;">{{ edu.type }}{% if edu.degree %} em {{ edu.degree }}{% endif %}</td>
+                            <td align="right" class="item-sub" style="margin-bottom: 0; padding: 0; text-align: right; width: 35%;">{{ edu.year }}</td>
+                        </tr>
+                    </table>
+                    <div class="item-sub" style="color: #64748b; font-weight: 500;">{{ edu.school }}</div>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
