@@ -16,8 +16,44 @@ document.addEventListener('DOMContentLoaded', () => {
     initSkills();
     initTemplateSelector();
     initPhoto();
-    initProtection();
 });
+
+function crc16(data) {
+    let crc = 0xFFFF;
+    for (let i = 0; i < data.length; i++) {
+        crc ^= data.charCodeAt(i) << 8;
+        for (let j = 0; j < 8; j++) {
+            if ((crc & 0x8000) !== 0) {
+                crc = (crc << 1) ^ 0x1021;
+            } else {
+                crc <<= 1;
+            }
+        }
+    }
+    return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+}
+
+function generatePixPayload() {
+    const key = PIX_CONFIG.key;
+    const name = PIX_CONFIG.name;
+    const city = PIX_CONFIG.city;
+    const amount = PIX_CONFIG.amount;
+
+    let payload = "000201";
+    payload += "26" + (22 + key.length).toString() + "0014br.gov.bcb.pix01" + key.length.toString().padStart(2, '0') + key;
+    payload += "52040000"; // Merchant Category Code
+    payload += "5303986"; // Currency Code (986 = BRL)
+    if (amount) {
+        payload += "54" + amount.length.toString().padStart(2, '0') + amount;
+    }
+    payload += "5802BR"; // Country Code
+    payload += "59" + name.length.toString().padStart(2, '0') + name; // Merchant Name
+    payload += "60" + city.length.toString().padStart(2, '0') + city; // Merchant City
+    payload += "62070503***"; // Transaction Amount
+    payload += "6304"; // CRC16
+
+    return payload + crc16(payload);
+}
 
 window.addEventListener('load', () => {
     const preloader = document.getElementById('preloader');
@@ -29,22 +65,6 @@ window.addEventListener('load', () => {
     }
 });
 
-function initProtection() {
-    const previewCanvas = document.querySelector('.preview-canvas');
-    if (previewCanvas) {
-        previewCanvas.addEventListener('contextmenu', e => e.preventDefault());
-    }
-
-    document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey && (e.key === 's' || e.key === 'p' || e.key === 'u')) || e.key === 'F12') {
-            e.preventDefault();
-        }
-        if (e.key === 'PrintScreen') {
-            navigator.clipboard.writeText('');
-            alert('Prints são bloqueados para proteger o conteúdo.');
-        }
-    });
-}
 
 function initPhoto() {
     const photoInput = document.getElementById('in-photo');
@@ -277,25 +297,14 @@ function removeItem(formId, previewId) {
     document.getElementById(previewId)?.remove();
 }
 
-// FUNÇÕES DE PAGAMENTO
-async function downloadImage() { await openPaymentModal(); }
+// FUNÇÕES DE DOWNLOAD E DOAÇÃO
+async function downloadImage() { await executeDownload(); }
 
 async function openPaymentModal() {
-    const btn = document.querySelector('.btn-download.pdf');
-    const originalBtn = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>...';
-
-    try {
-        const response = await fetch('/create_payment', { method: 'POST' });
-        const payment = await response.json();
-        if (payment.id) {
-            currentPaymentId = payment.id;
-            document.querySelector('#pix-qrcode img').src = `data:image/png;base64,${payment.point_of_interaction.transaction_data.qr_code_base64}`;
-            document.getElementById('pix-code').value = payment.point_of_interaction.transaction_data.qr_code;
-        }
-    } catch (e) { }
+    const pixCode = generatePixPayload();
+    document.getElementById('pix-code').value = pixCode;
+    document.querySelector('#pix-qrcode img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pixCode)}`;
     document.getElementById('payment-modal').classList.add('active');
-    btn.innerHTML = originalBtn;
 }
 
 function closePaymentModal() { document.getElementById('payment-modal').classList.remove('active'); }
@@ -307,60 +316,69 @@ function copyPixCode() {
     alert('PIX Copiado!');
 }
 
-async function verifyAndDownload() {
-    const btn = document.querySelector('.btn-confirm');
-    const originalBtn = btn.innerHTML;
-    btn.innerHTML = 'Verificando...';
-    if (currentPaymentId) {
-        try {
-            const response = await fetch(`/check_payment/${currentPaymentId}`);
-            const data = await response.json();
-            if (data.status === 'approved') {
-                await executeDownload();
-                closePaymentModal();
-            } else { alert("Aguardando aprovação..."); }
-        } catch (e) { alert("Erro de rede."); }
-    } else {
-        setTimeout(async () => { await executeDownload(); closePaymentModal(); }, 2000);
-    }
-    btn.innerHTML = originalBtn;
-}
 
 async function executeDownload() {
     const paper = document.getElementById('cv-preview');
+    const downloadBtn = document.querySelector('.btn-download.pdf');
+    const originalBtnText = downloadBtn.innerHTML;
+    
+    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+    downloadBtn.disabled = true;
     paper.classList.add('downloading');
 
-    // Salva o estado atual
-    const originalTransform = paper.style.transform;
-    const originalWidth = paper.style.width;
-
-    // Reseta para tamanho real para a captura
-    paper.style.setProperty('transform', 'none', 'important');
-    paper.style.width = '210mm'; // Garante largura A4
-
     try {
-        // Pequena pausa para o navegador processar o reset de estilo
-        await new Promise(r => setTimeout(r, 500));
+        // Garante que todas as imagens foram carregadas
+        const images = paper.getElementsByTagName('img');
+        await Promise.all(Array.from(images).map(img => {
+            if (img.complete) return Promise.resolve();
+            return new Promise(resolve => { img.onload = img.onerror = resolve; });
+        }));
 
         const canvas = await html2canvas(paper, {
             scale: 2,
             useCORS: true,
+            allowTaint: true,
             backgroundColor: '#ffffff',
-            windowWidth: 800, // Força largura de captura
-            scrollY: -window.scrollY // Corrige problemas de scroll no mobile
+            logging: false,
+            onclone: (clonedDoc) => {
+                const clonedPaper = clonedDoc.getElementById('cv-preview');
+                clonedPaper.style.transform = 'none';
+                clonedPaper.style.width = '210mm';
+                clonedPaper.style.height = '297mm';
+                clonedPaper.style.display = 'block';
+                clonedPaper.style.position = 'relative';
+                const content = clonedPaper.querySelector('.cv-content');
+                if (content) content.style.display = 'flex';
+            }
         });
 
-        const link = document.createElement('a');
-        link.download = `curriculo.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+        if (canvas.width === 0 || canvas.height === 0) {
+            throw new Error('Falha ao gerar o canvas.');
+        }
+
+        canvas.toBlob((blob) => {
+            if (!blob) {
+                alert('Erro ao gerar o arquivo de imagem.');
+                return;
+            }
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = `curriculo_${new Date().getTime()}.png`;
+            link.href = url;
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(() => {
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }, 100);
+        }, 'image/png', 1.0);
+
     } catch (e) {
-        console.error(e);
-        alert('Erro no download');
+        console.error('Download Error:', e);
+        alert('Erro no download: ' + e.message);
     } finally {
-        // Restaura o estado visual
-        paper.style.setProperty('transform', originalTransform, 'important');
-        paper.style.width = originalWidth;
+        downloadBtn.innerHTML = originalBtnText;
+        downloadBtn.disabled = false;
         paper.classList.remove('downloading');
     }
 }
